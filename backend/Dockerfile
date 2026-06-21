@@ -1,10 +1,7 @@
-FROM python:3.10-slim-buster
-
+FROM docker.io/library/python:3.10-slim-bookworm
 WORKDIR /app
 
-# Install system dependencies needed for PyTorch, Pillow, etc.
-# build-essential and gfortran are crucial for compiling some Python package dependencies
-# libffi-dev is needed for bcrypt (dependency of PyNaCl which bcrypt uses)
+# System dependencies needed for PyTorch, Pillow, bcrypt
 RUN apt-get update && apt-get install -y \
     libgl1-mesa-glx \
     build-essential \
@@ -12,25 +9,20 @@ RUN apt-get update && apt-get install -y \
     libffi-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements.txt and install Python dependencies
-COPY requirements.txt .
+COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt --extra-index-url https://download.pytorch.org/whl/cpu
 
-# Copy FAISS index and CID map.
-# IMPORTANT: Ensure 'faiss_index.bin' and 'cid_map.npy' are in the same directory
-# as your Dockerfile.
-COPY faiss_index.bin .
-COPY cid_map.npy .
+# NOTE: faiss_index.bin and cid_map.npy are stubbed out for now.
+# COPY backend/faiss_index.bin .
+# COPY backend/cid_map.npy .
 
-# Copy your application code
-COPY similarity_module.py .
-COPY app.py .
+# Copy the models package (similarity_module.py) so 'from models import similarity_module' works
+COPY models/ ./models/
+COPY backend/app.py .
 
-# Cloud Run expects the application to listen on the port defined by the PORT environment variable.
-# Default is 8080.
-ENV PORT 8080
-ENV KMP_DUPLICATE_LIB_OK=TRUE # Essential for PyTorch on some systems
+ENV PORT=5000
+# Essential for PyTorch on some systems
+ENV KMP_DUPLICATE_LIB_OK=TRUE
 
-# Command to run the Flask application using Gunicorn
-# Using the shell form to ensure $PORT environment variable is expanded.
+EXPOSE 5000
 CMD gunicorn --bind 0.0.0.0:$PORT app:app

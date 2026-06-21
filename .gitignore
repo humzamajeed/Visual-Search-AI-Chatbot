@@ -121,7 +121,10 @@ dmypy.json
 *.safetensors
 *.bin
 checkpoints/
-models/
+!models/
+models/*
+!models/__init__.py
+!models/similarity_module.py
 weights/
 saved_models/
 model_weights/
@@ -372,3 +375,5 @@ data/*
 # Keep screenshots directory structure but ignore contents
 screenshots/*
 !screenshots/.gitkeep
+
+!frontend/src/rg.jpeg
