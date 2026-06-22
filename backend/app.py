@@ -52,6 +52,10 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 CORS(app)
 
+# Prometheus metrics instrumentation
+from prometheus_flask_exporter import PrometheusMetrics
+metrics = PrometheusMetrics(app)
+
 # JWT Configuration
 # TODO: In production, use os.getenv("JWT_SECRET_KEY") with a strong, unique value
 app.config["JWT_SECRET_KEY"] = os.getenv(
