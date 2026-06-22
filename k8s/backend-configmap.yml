@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+  namespace: visual-search
+data:
+  MONGO_DB_NAME: "zappos_products"
+  MONGO_COLLECTION_NAME: "products"
+  MONGO_USERS_COLLECTION_NAME: "users"
+  PORT: "5000"
