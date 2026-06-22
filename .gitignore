@@ -377,3 +377,4 @@ screenshots/*
 !screenshots/.gitkeep
 
 !frontend/src/rg.jpeg
+minikube-linux-amd64
