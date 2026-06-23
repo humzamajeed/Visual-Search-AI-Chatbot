@@ -17,12 +17,31 @@ kubectl apply -f "$K8S_DIR/backend-configmap.yml"
 
 echo "[4/9] Applying PersistentVolume and PVC..."
 kubectl apply -f "$K8S_DIR/mongo-pv.yml"
+
+# Self-heal: if mongo-pv is stuck in "Released" state from a previous run
+PV_STATUS=$(kubectl get pv mongo-pv -o jsonpath='{.status.phase}' 2>/dev/null || echo "")
+if [ "$PV_STATUS" = "Released" ]; then
+  echo "  mongo-pv is in 'Released' state — clearing stale claimRef to make it Available..."
+  kubectl patch pv mongo-pv -p '{"spec":{"claimRef": null}}'
+  sleep 2
+fi
+
 kubectl apply -f "$K8S_DIR/mongo-pvc.yml"
+
+echo "  Waiting for mongo-pvc to bind..."
+for i in $(seq 1 30); do
+  PVC_STATUS=$(kubectl get pvc mongo-pvc -n "$NAMESPACE" -o jsonpath='{.status.phase}' 2>/dev/null || echo "")
+  if [ "$PVC_STATUS" = "Bound" ]; then
+    echo "  mongo-pvc is Bound."
+    break
+  fi
+  sleep 2
+done
 
 echo "[5/9] Deploying MongoDB..."
 kubectl apply -f "$K8S_DIR/mongo-deployment.yml"
 kubectl apply -f "$K8S_DIR/mongo-service.yml"
-kubectl wait --for=condition=ready pod -l app=mongo -n "$NAMESPACE" --timeout=120s
+kubectl wait --for=condition=ready pod -l app=mongo -n "$NAMESPACE" --timeout=180s
 
 echo "[6/9] Deploying backend..."
 kubectl apply -f "$K8S_DIR/backend-deployment.yml"
@@ -32,7 +51,7 @@ kubectl wait --for=condition=ready pod -l app=backend -n "$NAMESPACE" --timeout=
 echo "[7/9] Deploying frontend..."
 kubectl apply -f "$K8S_DIR/frontend-deployment.yml"
 kubectl apply -f "$K8S_DIR/frontend-service.yml"
-kubectl wait --for=condition=ready pod -l app=frontend -n "$NAMESPACE" --timeout=120s
+kubectl wait --for=condition=ready pod -l app=frontend -n "$NAMESPACE" --timeout=180s
 
 echo "[8/9] Deploying Prometheus monitoring..."
 kubectl apply -f "$K8S_DIR/prometheus-config.yml"
