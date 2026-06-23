@@ -377,3 +377,11 @@ screenshots/*
 !screenshots/.gitkeep
 
 !frontend/src/rg.jpeg
+minikube-linux-amd64
+
+# Terraform
+terraform/.terraform/
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup
+terraform/.terraform.lock.hcl
+*.tfvars

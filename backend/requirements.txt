@@ -28,3 +28,4 @@ gunicorn==21.2.0                # Production WSGI HTTP server for Unix
 
 # Note: werkzeug is included as a dependency of Flask and provides password hashing functions
 # (generate_password_hash, check_password_hash) used in authentication
+prometheus-flask-exporter
