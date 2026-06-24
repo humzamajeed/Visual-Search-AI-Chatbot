@@ -1,0 +1,294 @@
+DevOps Semester Project — Full Video Script (All 3 Team Members)
+Visual Search AI Chatbot — Complete CI/CD Pipeline
+This script is written in simple, natural spoken English. Each team member reads only their own section. Total runtime target: 10–15 minutes across all three.
+---
+👤 TEAM MEMBER 1 (Humza) — Git & Docker (~5-6 minutes)
+🎬 SEGMENT 1 — Introduction & Problem (~2 minutes)
+[Look at camera, smile, start talking]
+> "Hi everyone. I'm Humza. With me are \\\[Teammate 2 name] and \\\[Teammate 3 name]. Together we are \\\[group name].
+>
+> This is our DevOps semester project.
+>
+> So — what did we build? We built a complete CI/CD pipeline. CI/CD means Continuous Integration and Continuous Deployment. Basically it means — whenever we write new code, the system automatically takes that code, packages it, and deploys it. No manual work needed.
+>
+> We built this pipeline for our own application — a Visual Search AI Chatbot. This app lets users search for products using images instead of text. It uses Flask for the backend, React for the frontend, MongoDB as the database, and ResNet50 with FAISS for the AI image search part.
+>
+> Now — what was the problem we were solving?
+>
+> Imagine you are a developer. You write code. Now you need to deploy it. If you do this manually — it takes time, you might make mistakes, and every deployment looks different. This is a big problem for software teams.
+>
+> Our goal was — make deployment fully automatic. Zero manual steps. You push code, everything else happens by itself.
+>
+> We solved this in five parts. One — Docker for containerization. Two — Kubernetes for orchestration. Three — GitHub Actions for CI/CD automation. Four — Prometheus and Grafana for monitoring. Five — Terraform on AWS for cloud infrastructure.
+>
+> Also, one important thing — we did not use the Assignment 3 sample application. We used our own original application with the same pipeline. So we qualify for the bonus marks.
+>
+> Let me show you the project."
+[Show terminal]
+```bash
+cd \\\~/project
+ls -la
+```
+> "Here is our project folder. You can see the backend, frontend, Kubernetes files, Terraform files, and GitHub Actions workflow — all in one place. Let's go through each part."
+---
+🎬 SEGMENT 2 — Version Control (~1.5 minutes)
+[Stay in terminal]
+> "First — version control. We used Git and GitHub to manage our code.
+>
+> Why is this important? Because in a team, multiple people are writing code at the same time. Without version control, it becomes a mess. Git keeps track of every change, who made it, and when.
+>
+> Let me show you our commit history."
+```bash
+git log --oneline --all | head -15
+```
+> "You can see our commits here. Each line is one commit — one save point in our project. These are real commits made during development, not fake ones added at the end just for submission.
+>
+> Now let me show our branches."
+```bash
+git branch -a
+```
+> "We have a main branch, a develop branch, and feature branches. This is a proper workflow — new features are built in separate branches and then merged into main through pull requests.
+>
+> Let me show you a pull request on GitHub."
+[Switch to browser — GitHub → Pull Requests tab]
+> "Here is a merged pull request. This is how we reviewed each other's code before merging it. Clean, organized, professional."
+---
+🎬 SEGMENT 3 — Docker & Containerization (~2.5 minutes)
+> "Now the most important foundation of our pipeline — Docker.
+>
+> So what is Docker? Simply put — Docker packages your application into a container. A container has everything your app needs to run — the code, the libraries, the settings. So it runs the same way on every machine. No more 'it works on my laptop but not on the server' problem.
+>
+> Let me show you our Dockerfile."
+```bash
+cat backend/Dockerfile
+```
+> "This is the Dockerfile for our backend. It installs Python, then installs PyTorch and FAISS — the libraries our AI search needs. Our frontend has a separate Dockerfile that uses a multi-stage build — first it compiles the React app, then it serves it using Nginx. Multi-stage means the final image is smaller and cleaner.
+>
+> Now — we don't run these containers one by one. We use Docker Compose to run all three together."
+```bash
+docker compose up -d
+```
+> "This one command starts our entire application — MongoDB, backend, and frontend — all together, on the same network, with shared storage for the database."
+```bash
+docker compose ps
+```
+> "All three services are running. But let me prove this is actually working — not just containers sitting there doing nothing."
+```bash
+curl -s http://127.0.0.1:5000/signup -X POST -H "Content-Type: application/json" -d '{"username":"fdemo","password":"fdemo123"}'
+echo ""
+```
+> "We just created a new user. Now let me log in."
+```bash
+curl -s http://127.0.0.1:5000/login -X POST -H "Content-Type: application/json" -d '{"username":"fdemo","password":"fdemo123"}'
+echo ""
+```
+> "You can see a JWT token in the response. This is a real login — the request went from the terminal, to the Flask backend, to MongoDB, and came back with a token. Everything is connected and working.
+>
+> Now let me shut this down because in the next step, we will deploy this properly using Kubernetes."
+```bash
+docker compose down
+```
+> "Docker Compose is great for local development. But for production, we need something more powerful — which is what my teammate will show you next with Kubernetes."
+---
+👤 TEAM MEMBER 2 — CI/CD & Kubernetes (~5-6 minutes)
+🎬 SEGMENT 4 — CI/CD Pipeline with GitHub Actions (~2 minutes)
+[Take over, smile at camera]
+> "Thanks, Humza. Hi, I'm \\\[name]. I worked on the CI/CD automation and the Kubernetes deployment for this project. Let me show you both.
+>
+> First — CI/CD. We already saw Docker packages our app. But who actually builds that Docker image, and who pushes it somewhere everyone can use it? Doing that by hand every time is slow and easy to forget. So we automated it completely using GitHub Actions.
+>
+> Let me show you how it works."
+[Switch to browser — GitHub Actions tab]
+> "Every single time someone pushes code to our main branch, this pipeline runs automatically. No one has to remember to do anything. Look — here are our previous runs, all green, all successful."
+[Switch back to terminal]
+```bash
+cat .github/workflows/ci-cd.yml
+```
+> "This is the actual configuration file. Let me explain it simply. Step one — it checks out our latest code. Step two — it logs into DockerHub using secure credentials we stored as GitHub secrets, not hard-coded anywhere. Step three and four — it builds our backend image and our frontend image, and pushes both straight to DockerHub.
+>
+> Let me show you a completed run."
+[Browser — click into a run, show the green steps]
+> "Checkout, login, build backend, build frontend — all automatic, all successful. And here on DockerHub —"
+[Browser — DockerHub repositories page]
+> "— here are both images, live, automatically updated by that pipeline. This means anytime any of us pushes a code change, within a couple of minutes there's a brand-new, ready-to-deploy image sitting on DockerHub. Zero manual work."
+---
+🎬 SEGMENT 5 — Kubernetes Orchestration (~3.5 minutes)
+> "Now let's talk about Kubernetes — this is the biggest part of what I worked on.
+>
+> So, Docker gives us containers. But in real production, you don't run just one container — you need many containers working together, you need them to restart automatically if they crash, you need to scale up when traffic increases. That's exactly what Kubernetes does. It's a system that manages all our containers for us.
+>
+> Let me prove something important first — that our deployment works completely from scratch, with zero manual steps."
+```bash
+minikube status
+kubectl delete namespace visual-search
+kubectl get namespaces
+```
+> "I just deleted everything. Our entire application is now completely gone from this cluster. Watch what happens next."
+```bash
+./start.sh
+```
+> "This single script — start dot sh — brings back our entire application by itself. While this rns, let me explain what it's doing. It creates a namespace, which is like a separate workspace for our app. Then it applies our secrets — our database passwords, securely stored, never written in plain text in our code. Then it sets up persistent storage for our database, so our data survives even if a container restarts. Then it deploys MongoDB, then our backend, then our frontend, then our monitoring tools.
+>
+> One more thing — this script is self-healing. If our database storage was left in a strange state from a previous run, the script automatically detects that and fixes it before continuing. We added that after running into this exact problem ourselves during testing."
+[Wait for it to finish]
+```bash
+kubectl get pods -n visual-search
+kubectl get svc -n visual-search
+```
+> "And there it is — five pods running. MongoDB, backend, frontend, Prometheus, and Grafana. Each one has its own Service, which is how they find and talk to each other inside the cluster."
+```bash
+kubectl get pv
+kubectl get pvc -n visual-search
+```
+> "And here's our persistent storage — bound and ready. This means our database data is safe even if pods restart."
+> "Now let me show you something really powerful — self-healing."
+```bash
+kubectl delete pod $(kubectl get pods -n visual-search -l app=backend -o jsonpath='{.items\\\[0].metadata.name}') -n visual-search
+kubectl get pods -n visual-search -w
+```
+> "I just deleted our backend pod on purpose. Watch — Kubernetes notices it's gone and creates a brand-new one automatically, within seconds. In a real production system, this means if a server crashes at 3 AM, nobody needs to wake up and fix it manually."
+[Ctrl+C once the new pod shows Running]
+> "Next — scaling. If our app suddenly gets a lot of traffic, we can handle it instantly."
+```bash
+kubectl scale deployment backend -n visual-search --replicas=3
+kubectl get pods -n visual-search
+```
+> "One command, and now we have three copies of our backend running at the same time, sharing the load.
+>
+> Last thing — updates. What happens when we want to deploy a new version of our app?"
+```bash
+kubectl set image deployment/backend backend=docker.io/humza1535/visual-search-backend:v2 -n visual-search
+kubectl rollout status deployment/backend -n visual-search
+```
+> "This is called a rolling update. Kubernetes replaces our old pods with new ones, one at a time, so our app never goes down during the update. And if something goes wrong with the new version —"
+```bash
+kubectl rollout undo deployment/backend -n visual-kubectl rollout undo deployment/backend -n visual-search
+```
+> "— we can roll back instantly to the previous working version. This is a really important safety feature for real production systems."
+```bash
+kubectl scale deployment backend -n visual-search --replicas=1
+```
+> "Now I'll hand it over to \\\[Teammate 3] to show you our monitoring and our cloud deployment."
+---
+👤 TEAM MEMBER 3 — Monitoring & Cloud Deployment (~3.5-4 minutes)
+🎬 SEGMENT 6 — Monitoring with Prometheus and Grafana (~1.5 minutes)
+[Take over, smile at camera]
+> "Thanks. Hi, I'm \\\[name]. I worked on monitoring and our cloud infrastructure. Let me show you monitoring first.
+>
+> Here's the problem we wanted to solve — once an application is running in production, how do you actually know if it's healthy? How many requests is it getting? Are there errors? Without monitoring, you're completely blind. So we set up Prometheus and Grafana.
+>
+> Prometheus is a tool that collects metrics — numbers about how our app is performing. Grafana is a tool that takes those numbers and turns them into nice visual dashboards. Let me generate some real traffic first, then show you."
+```bash
+kubectl port-forward -n visual-search svc/backend 5000:5000 \\\&
+sleep 3
+kill %1
+```
+> "I just sent five real login requests to our backend. Now let's look at the dashboard."
+```bash
+kubectl port-forward -n visual-search svc/grafana 3000:3000
+```
+[Browser — open 127.0.0.1:3000, log in, open the saved dashboard, click Refresh]
+> "Here's our dashboard. Our Flask backend exposes a special endpoint called slash metrics, using a library called prometheus-flask-exporter. Prometheus automatically scrapes that endpoint every few seconds. And here in Grafana, you can see real numbers — the actual requests we just sent, broken down by status code. This gives us real visibility into how our application is behaving, live."
+---
+🎬 SEGMENT 7 — Infrastructure as Code with Terraform & AWS (~2 minutes)
+> "Now let me show you our cloud deployment work. This was a bonus part of our project.
+>
+> So far everything we've shown runs locally on our own machine using Minikube. But real production systems run on the cloud — AWS, Azure, Google Cloud. The old way of setting up cloud servers is clicking around manually in a web console — slow, and easy to make mistakes or forget what you did. So instead, we used Terraform. Terraform lets us write our cloud infrastructure as code — meaning it's written down, version controlled, and repeatable.
+>
+> Let me show you our Terraform file."
+```bash
+cd terraform
+cat main.tf
+```
+> "This file describes exactly what we want on AWS — a security group for network rules, and a virtual server, called an EC2 instance. Let's see what Terraform plans to do before actually doing it — this is an important safety practice, you always preview changes first."
+```bash
+terraform plan
+```
+> "It shows exactly two things it will create. Nothing is hidden, nothing is surprising. Now let's actually create it."
+```bash
+terraform apply
+```
+> "While this runs — it's creating a real virtual machine on Amazon's cloud right now, fully automatically, from this one command."
+```bash
+aws ec2 describe-instances --filters "Name=tag:Name,Values=visual-search-devops-project" --query 'Reservations\\\[].Instances\\\[].{ID:InstanceId,State:State.Name,IP:PublicIpAddress}' --output table
+```
+> "And here it is — a real, running server on AWS, with a real public IP address. This proves our infrastructure as code actually works on a real cloud provider, not just locally.
+>
+> Now, since this is just a demonstration and we don't want to leave it running and accumulating any cost, let's clean it up properly."
+```bash
+terraform destroy
+```
+> "And it's gone. This is responsible cloud resource management — never leave things running that you don't need. That's an important security and cost practice in real DevOps work."
+---
+🎬 SEGMENT 8 — Issues We Faced During Development (~2 minutes)
+[All three, one after another]
+> \\\*\\\*Humza:\\\*\\\* "I want to share some real problems we ran into. First — our backend code needed an AI model file and a search index file that were too large to store in Git, so they were never actually in our repository. When we tried to run the app fresh, it crashed immediately on startup. We fixed this by writing a stub version of that module — so the app boots up normally and all the other features work fine, even without the full AI model loaded."
+> \\\*\\\*\\\[Teammate 2]:\\\*\\\* "I ran into a tricky Kubernetes bug. In our configuration file, we had a line that builds our database connection string using two other variables — a username and a password. But I had accidentally written that line \\\*before\\\* defining those two variables in the file. Kubernetes reads these top to bottom, so it couldn't substitute the values, and our backend kept crashing with login errors. I found this by reading MongoDB's own error logs, which said it couldn't find a user with a strange-looking name — that's when I realized the variables weren't being replaced properly. Moving those two lines above fixed it completely."
+> \\\*\\\*\\\[Teammate 3]:\\\*\\\* "I learned that Grafana dashboards aren't saved permanently by default — when we deleted and recreated our Kubernetes setup during testing, our dashboard disappeared completely because we hadn't given Grafana its own persistent storage like we did for MongoDB. I had to rebuild it for this recording. We've noted that as something to fix properly going forward. I also ran into some tricky networking and free-tier server type issues on AWS, which took some research and trial and error to resolve."
+---
+🎬 SEGMENT 9 — Future Enhancements & Closing (~1.5 minutes)
+[All three together]
+> \\\*\\\*Humza:\\\*\\\* "So to summarize — the problem was slow, manual, error-prone deployment. We solved it with a fully automated pipeline covering version control, Docker, Kubernetes, CI/CD, monitoring, and infrastructure as code. We also hit and fixed several real issues along the way, which we just walked through."
+> \\\*\\\*\\\[Teammate 2]:\\\*\\\* "Looking forward, there are a few things we'd like to improve. We'd rebuild our actual FAISS search index using real product data instead of running in stub mode. We'd add persistent storage for Grafana so dashboards never disappear. We'd add auto-scaling that automatically increases our backend replicas based on the live traffic data we're already collecting in Prometheus."
+> \\\*\\\*\\\[Teammate 3]:\\\*\\\* "We'd also deploy our full application — not just the infrastructure — onto AWS. And we'd add automated tests into our CI/CD pipeline, so code is tested automatically before it ever gets built into an image."
+> \\\*\\\*Humza:\\\*\\\* "Here's a quick summary of what each of us worked on. I built the Docker setup, Docker Compose, the CI/CD pipeline, and fixed the missing AI model issue."
+> \\\*\\\*\\\[Teammate 2]:\\\*\\\* "I built all the Kubernetes deployments, handled scaling and rollback testing, and fixed the environment variable bug."
+> \\\*\\\*\\\[Teammate 3]:\\\*\\\* "I built the Prometheus and Grafana monitoring, and the Terraform AWS deployment."
+> \\\*\\\*All three together:\\\*\\\* "Thank you for watching!"
+---
+Quick Command Reference (All Segments, In Order)
+```bash
+# Pre-check
+
+minikube start
+minikube status
+kubectl get pods -n visual-search
+
+# TEAM MEMBER 1
+cd \\\~/project
+ls -laclear
+git log --oneline --all | head -15
+git branch -a
+cat backend/Dockerfile
+docker compose up -d
+docker compose ps
+curl -s http://127.0.0.1:5000/signup -X POST -H "Content-Type: application/json" -d '{"username":"cdemo","password":"cdemo123"}'
+echo ""
+curl -s http://127.0.0.1:5000/login -X POST -H "Content-Type: application/json" -d '{"username":"cdemo","password":"cdemo123"}'
+echo ""
+docker compose down
+
+# TEAM MEMBER 2
+cat .github/workflows/ci-cd.yml
+minikube status
+kubectl delete namespace visual-search
+kubectl get namespaces
+./start.sh
+kubectl get pods -n visual-search
+kubectl get svc -n visual-search
+kubectl get pv
+kubectl get pvc -n visual-search
+kubectl delete pod $(kubectl get pods -n visual-search -l app=backend -o jsonpath='{.items\\\[0].metadata.name}') -n visual-search
+kubectl get pods -n visual-search -w
+# Ctrl+C once recreated
+kubectl scale deployment backend -n visual-search --replicas=3
+kubectl get pods -n visual-search
+kubectl set image deployment/backend backend=docker.io/humza1535/visual-search-backend:v2 -n visual-search
+kubectl rollout status deployment/backend -n visual-search
+kubectl rollout undo deployment/backend -n visual-search
+kubectl scale deployment backend -n visual-search --replicas=1
+
+# TEAM MEMBER 3
+kubectl port-forward -n visual-search svc/backend 5000:5000 \\\&
+sleep 3
+for i in {1..5}; do curl -s -o /dev/null http://127.0.0.1:5000/login -X POST -H "Content-Type: application/json" -d '{"username":"demo","password":"demo123"}'; sleep 0.5; done
+kill %1
+kubectl port-forward -n visual-search svc/grafana 3000:3000
+# Ctrl+C when done viewing dashboard
+cd terraform
+cat main.tfyes
+terraform plan
+terraform apply
+aws ec2 describe-instances --filters "Name=tag:Name,Values=visual-search-devops-project" --query 'Reservations\\\[].Instances\\\[].{ID:InstanceId,State:State.Name,IP:PublicIpAddress}' --output table
+terraform destroy
+```
